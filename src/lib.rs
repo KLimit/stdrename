@@ -290,8 +290,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     if !config.quiet {
         println!(
-            "{} files renamed in {} s. See you next time!\n(^ _ ^)/",
-            files_renamed, running_time
+            "{} files {}renamed in {} s. See you next time!\n(^ _ ^)/",
+            files_renamed, if config.dryrun {"would be "} else {""}, running_time
         )
     };
 
