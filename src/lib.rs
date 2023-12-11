@@ -26,6 +26,7 @@ pub struct Config {
     include_dir: bool,
     quiet: bool,
     text: bool,
+    dryrun: bool,
 }
 
 impl Config {
@@ -124,6 +125,12 @@ impl Config {
                 .short('q')
                 .long("quiet")
         )
+        .arg(
+            Arg::with_name("dryrun")
+                .help("Prints paths that would be renamed without changing any files")
+                .short('n')
+                .long("dry-run")
+        )
         .after_help("Full documentation available here: https://github.com/Gadiguibou/stdrename")
         .get_matches();
 
@@ -161,6 +168,7 @@ impl Config {
         let include_dir = matches.is_present("directories");
         let quiet = matches.is_present("quiet");
         let text = matches.is_present("text");
+        let dryrun = matches.is_present("dryrun");
 
         Ok(Config {
             target_dir,
@@ -169,6 +177,7 @@ impl Config {
             include_dir,
             quiet,
             text,
+            dryrun,
         })
     }
 }
@@ -259,7 +268,15 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             .ok_or("can't find path parent")?
             .join(new_name);
         if path != new_path {
-            fs::rename(&path, &new_path)?;
+            if !config.dryrun {
+                fs::rename(&path, &new_path)?;
+            } else {
+                // might be better to put the printing in change_naming_convention
+                // and always do it unless output is suppressed, then have
+                // the dry-run flag be a combination of verbose/nonsuppress
+                // and a new flag that prevents renaming
+                println!("{} -> {}", path.display(), new_path.display());
+            }
             files_renamed += 1;
         }
     }
