@@ -275,7 +275,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                 // and always do it unless output is suppressed, then have
                 // the dry-run flag be a combination of verbose/nonsuppress
                 // and a new flag that prevents renaming
-                println!("{} -> {}", path.display(), new_path.display());
+                println!(
+                    "{} -> {}",
+                    // would be nice to do relative paths for when
+                    // target dir is not cwd
+                    path.strip_prefix(&config.target_dir)?.display(),
+                    new_path.strip_prefix(&config.target_dir)?.display()
+                 );
             }
             files_renamed += 1;
         }
